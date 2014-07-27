@@ -23,6 +23,10 @@ var Phaser = Phaser || {
     RIGHT: 2,
     UP: 3,
     DOWN: 4,
+    FORWARDX: 5,
+    FORWARDY: 6,
+    BACKX: 7,
+    BACKY: 8,
 
     SPRITE: 0,
     BUTTON: 1,

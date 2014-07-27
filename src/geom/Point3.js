@@ -8,7 +8,6 @@ Phaser.Point3 = function (x, y, z) {
     y = y || 0;
     z = z || 0;
 
-
     /**
     * @property {number} x - The x value of the point.
     */
@@ -24,3 +23,16 @@ Phaser.Point3 = function (x, y, z) {
     */
     this.z = z;
 };
+
+Phaser.Point3.prototype = {
+    set: function (x, y, z) {
+        this.x = x || 0;
+        this.y = y || ((y !== 0) ? this.x : 0);
+        this.z = z || ((z !== 0) ? this.x : 0);
+
+        return this;
+    },
+    setTo: function (x, y, z) {
+        return this.set(x, y, z);
+    }
+}

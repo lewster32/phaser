@@ -713,6 +713,11 @@ Phaser.Utils.Debug.prototype = {
                 Phaser.Physics.Ninja.Body.render(this.context, sprite.body, color, filled);
                 this.stop();
             }
+            else if (sprite.body.type === Phaser.Physics.ISOARCADE) {
+                this.start();
+                Phaser.Physics.IsoArcade.Body.render(this.context, sprite.body, color, filled);
+                this.stop();
+            }
         }
 
     },
@@ -734,6 +739,12 @@ Phaser.Utils.Debug.prototype = {
             {
                 this.start(x, y, color, 210);
                 Phaser.Physics.Arcade.Body.renderBodyInfo(this, sprite.body);
+                this.stop();
+            }
+            else if (sprite.body.type === Phaser.Physics.ISOARCADE)
+            {
+                this.start(x, y, color, 210);
+                Phaser.Physics.IsoArcade.Body.renderBodyInfo(this, sprite.body);
                 this.stop();
             }
         }

@@ -57,6 +57,11 @@ Phaser.Physics = function (game, config) {
     */
     this.chipmunk = null;
 
+    /**
+    * @property {Phaser.Physics.IsoArcade} isoArcade- The Isometric Arcade Physics system.
+    */
+    this.isoArcade = null;
+
     this.parseConfig();
 
 };
@@ -91,6 +96,12 @@ Phaser.Physics.BOX2D = 3;
 */
 Phaser.Physics.CHIPMUNK = 5;
 
+/**
+* @const
+* @type {number}
+*/
+Phaser.Physics.ISOARCADE = 6;
+
 Phaser.Physics.prototype = {
 
     /**
@@ -115,6 +126,10 @@ Phaser.Physics.prototype = {
         if (this.config.hasOwnProperty('p2') && this.config['p2'] === true && Phaser.Physics.hasOwnProperty('P2'))
         {
             this.p2 = new Phaser.Physics.P2(this.game, this.config);
+        }
+
+        if (this.config.hasOwnProperty('isoArcade') && this.config['isoArcade'] === true && Phaser.Physics.hasOwnProperty('IsoArcade')) {
+            this.isoArcade = new Phaser.Physics.IsoArcade(this.game, this.config);
         }
 
     },
@@ -151,6 +166,9 @@ Phaser.Physics.prototype = {
         else if (system === Phaser.Physics.CHIPMUNK && this.chipmunk === null)
         {
             throw new Error('The Chipmunk physics system has not been implemented yet.');
+        }
+        else if (system === Phaser.Physics.ISOARCADE && this.isoArcade === null) {
+            this.isoArcade = new Phaser.Physics.IsoArcade(this.game);
         }
 
         this.setBoundsToWorld();
@@ -191,6 +209,10 @@ Phaser.Physics.prototype = {
         else if (system === Phaser.Physics.NINJA && this.ninja)
         {
             this.ninja.enableAABB(object);
+        }
+        else if (system === Phaser.Physics.ISOARCADE && this.isoArcade)
+        {
+            this.isoArcade.enable(object);
         }
 
     },
@@ -252,6 +274,10 @@ Phaser.Physics.prototype = {
             this.p2.setBoundsToWorld();
         }
 
+        if (this.isoArcade) {
+            this.isoArcade.setBoundsToWorld();
+        }
+
     },
 
     /**
@@ -284,7 +310,7 @@ Phaser.Physics.prototype = {
         this.arcade = null;
         this.ninja = null;
         this.p2 = null;
-
+        this.isoArcade = null;
     }
 
 };
