@@ -255,10 +255,9 @@ Phaser.Camera.prototype = {
         }
         else
         {
-            this.view.x = this.target.x - this.view.halfWidth;
-            this.view.y = this.target.y - this.view.halfHeight;
+            this.view.x = this.target.world.x - this.view.halfWidth;
+            this.view.y = this.target.world.y - this.view.halfHeight;
         }
-
     },
 
     /**

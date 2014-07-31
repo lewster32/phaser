@@ -1335,11 +1335,9 @@ Phaser.Physics.IsoArcade.prototype = {
     * @param {any} displayObject - The Display Object to test from.
     * @param {number} x - The x coordinate to get the angle to.
     * @param {number} y - The y coordinate to get the angle to.
-    * @return {number} The angle in radians between displayObject.x/y to Pointer.x/y
+    * @return {number} The angle in radians between displayObject.x/y to target x/y coordinate.
     */
     angleToXY: function (displayObject, x, y) {
-
-        //  ***** TODO PROPERLY *****
 
         this._dx = x - displayObject.x;
         this._dy = y - displayObject.y;

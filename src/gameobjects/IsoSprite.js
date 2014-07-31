@@ -17,6 +17,8 @@ Phaser.IsoSprite = function (game, x, y, z, key, frame, parent) {
     this.snap = 0.3;
 };
 
+Phaser.IsoSprite.projectionRatio = 0.5;
+
 Phaser.IsoSprite.prototype = Object.create(Phaser.Sprite.prototype);
 Phaser.IsoSprite.prototype.constructor = Phaser.IsoSprite;
 
@@ -131,22 +133,13 @@ Phaser.IsoSprite.prototype.postUpdate = function () {
 };
 
 Phaser.IsoSprite.prototype._toIso = function () {
-    Phaser.IsoSprite.isoToOrtho(this._isoPosition, this.position);
+    this.game.iso.project(this._isoPosition, this.position);
 
     if (this.snap) {
         this.position.x = Phaser.Math.snapTo(this.position.x, this.snap);
         this.position.y = Phaser.Math.snapTo(this.position.y, this.snap);
     }
 };
-
-Phaser.IsoSprite.isoToOrtho = function (point3, out) {
-    if (typeof out === "undefined") { out = new Phaser.Point(); }
-
-    out.x = point3.x - point3.y;
-    out.y = ((point3.x + point3.y) * 0.5) - point3.z;
-
-    return out;
-}
 
 Object.defineProperty(Phaser.IsoSprite.prototype, "ix", {
     get: function () {

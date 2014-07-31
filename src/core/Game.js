@@ -214,6 +214,11 @@ Phaser.Game = function (width, height, renderer, parent, state, transparent, ant
     this.particles = null;
 
     /**
+     * @property {Phaser.Isometric} iso - The isometric projection helper.
+     */
+    this.iso = null;
+
+    /**
     * @property {boolean} stepping - Enable core loop stepping with Game.enableStep().
     * @default
     * @readonly
@@ -457,6 +462,7 @@ Phaser.Game.prototype = {
             this.particles = new Phaser.Particles(this);
             this.plugins = new Phaser.PluginManager(this);
             this.net = new Phaser.Net(this);
+            this.iso = new Phaser.Isometric(this, 0.5);
 
             this.time.boot();
             this.stage.boot();
