@@ -27,7 +27,7 @@ Phaser.Physics.IsoArcade = function (game) {
     /**
     * @property {Phaser.Cube} bounds - The bounds inside of which the physics world exists. Defaults to match the world bounds relatively closely given the isometric projection.
     */
-    this.bounds = new Phaser.Cube(game.world.width * -0.5, game.world.width * -0.5, 0, game.world.width, game.world.width, game.world.height * 0.5);
+    this.bounds = new Phaser.Cube(game.world.width * -0.25, game.world.width * -0.25, 0, game.world.width * 0.25, game.world.width * 0.25, game.world.height * 0.25);
 
     /**
     * Set the checkCollision properties to control for which bounds collision is processed.
@@ -37,12 +37,12 @@ Phaser.Physics.IsoArcade = function (game) {
     this.checkCollision = { up: true, down: true, frontX: true, frontY: true, backX: true, backY: true };
 
     /**
-    * @property {number} maxObjects - Used by the Octree to set the maximum number of objects per quad.
+    * @property {number} maxObjects - Used by the QuadTree/Octree to set the maximum number of objects per quad.
     */
     this.maxObjects = 10;
 
     /**
-    * @property {number} maxLevels - Used by the Octree to set the maximum number of iteration levels.
+    * @property {number} maxLevels - Used by the QuadTree/Octree to set the maximum number of iteration levels.
     */
     this.maxLevels = 4;
 
@@ -57,7 +57,17 @@ Phaser.Physics.IsoArcade = function (game) {
     this.forceXY = false;
 
     /**
+    * @property {boolean} forceQuadTree - If true, the collision/overlap routines will use a QuadTree, which will ignore the z position of objects when determining potential collisions. This will be faster if you don't do a lot of stuff on the z-axis.
+    */
+    this.forceQuadTree = false;
+
+    /**
     * @property {Phaser.QuadTree} quadTree - The world QuadTree.
+    */
+    this.quadTree = new Phaser.QuadTree(this.bounds.x, this.bounds.y, this.bounds.widthX, this.bounds.widthY, this.maxObjects, this.maxLevels);
+
+    /**
+    * @property {Phaser.Octree} octree - The world Octree.
     */
     this.octree = new Phaser.Octree(this.bounds.x, this.bounds.y, this.bounds.z, this.bounds.widthX, this.bounds.widthY, this.bounds.height, this.maxObjects, this.maxLevels);
 
@@ -177,7 +187,7 @@ Phaser.Physics.IsoArcade.prototype = {
     */
     setBoundsToWorld: function () {
 
-        this.bounds.setTo(game.world.width * -0.5, game.world.width * -0.5, 0, game.world.width, game.world.width, game.world.height * 0.5);
+        this.bounds.setTo(game.world.width * -0.5, game.world.width * -0.25, 0, game.world.width * 0.44, game.world.width * 0.44, game.world.height * 0.5);
 
     },
 
@@ -379,6 +389,9 @@ Phaser.Physics.IsoArcade.prototype = {
         this._result = false;
         this._total = 0;
 
+        this.collideHandler(object1, object2, collideCallback, processCallback, callbackContext, false);
+
+        /*
         if (Array.isArray(object2)) {
             for (var i = 0, len = object2.length; i < len; i++) {
                 this.collideHandler(object1, object2[i], collideCallback, processCallback, callbackContext, false);
@@ -387,6 +400,7 @@ Phaser.Physics.IsoArcade.prototype = {
         else {
             this.collideHandler(object1, object2, collideCallback, processCallback, callbackContext, false);
         }
+        */
 
         return (this._total > 0);
 
@@ -412,22 +426,22 @@ Phaser.Physics.IsoArcade.prototype = {
             return;
         }
 
-        if (object1 && object2 && object1.exists && object2.exists) {
+        if (object1 && object2 && (object1.exists || object1.length) && (object2.exists || object2.length)) {
             //  ISOSPRITES
             if (object1.type == Phaser.ISOSPRITE) {
                 if (object2.type == Phaser.ISOSPRITE) {
                     this.collideSpriteVsSprite(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
                 }
-                else if (object2.type == Phaser.GROUP) {
+                else if (object2.type == Phaser.GROUP || Array.isArray(object2)) {
                     this.collideSpriteVsGroup(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
                 }
             }
             //  GROUPS
-            else if (object1.type == Phaser.GROUP) {
+            else if (object1.type == Phaser.GROUP || Array.isArray(object1)) {
                 if (object2.type == Phaser.ISOSPRITE) {
                     this.collideSpriteVsGroup(object2, object1, collideCallback, processCallback, callbackContext, overlapOnly);
                 }
-                else if (object2.type == Phaser.GROUP) {
+                else if (object2.type == Phaser.GROUP || Array.isArray(object2)) {
                     this.collideGroupVsGroup(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
                 }
             }
@@ -484,14 +498,26 @@ Phaser.Physics.IsoArcade.prototype = {
             return;
         }
 
-        //  What is the sprite colliding with in the quadtree?
-        this.octree.clear();
+        if (this.forceQuadTree) {
+            //  What is the sprite colliding with in the quadTree?
+            this.quadTree.clear();
 
-        this.octree.reset(this.bounds.x, this.bounds.y, this.bounds.z, this.bounds.widthX, this.bounds.widthY, this.bounds.height, this.maxObjects, this.maxLevels);
+            this.quadTree.reset(this.bounds.x, this.bounds.y, this.bounds.widthX, this.bounds.widthY, this.maxObjects, this.maxLevels);
 
-        this.octree.populate(group);
+            this.quadTree.populate(group);
 
-        this._potentials = this.octree.retrieve(sprite);
+            this._potentials = this.quadTree.retrieve(sprite);
+        }
+        else {
+            //  What is the sprite colliding with in the octree?
+            this.octree.clear();
+
+            this.octree.reset(this.bounds.x, this.bounds.y, this.bounds.z, this.bounds.widthX, this.bounds.widthY, this.bounds.height, this.maxObjects, this.maxLevels);
+
+            this.octree.populate(group);
+
+            this._potentials = this.octree.retrieve(sprite);
+        }
 
         for (var i = 0, len = this._potentials.length; i < len; i++) {
             //  We have our potential suspects, are they in this group?

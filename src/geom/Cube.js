@@ -48,6 +48,20 @@ Phaser.Cube = function (x, y, z, widthX, widthY, height) {
     * @property {number} height - The Z axis height of the Cube. This value should never be set to a negative.
     */
     this.height = height;
+
+    /**
+     * @property {Point3[]} _corners - The 8 corners of the Cube.
+     * @private
+     */
+    this._corners = [new Phaser.Point3(this.x, this.y, this.z),
+        new Phaser.Point3(this.x, this.y, this.z + this.height),
+        new Phaser.Point3(this.x, this.y + this.widthY, this.z),
+        new Phaser.Point3(this.x, this.y + this.widthY, this.z + this.height),
+        new Phaser.Point3(this.x + this.widthX, this.y, this.z),
+        new Phaser.Point3(this.x + this.widthX, this.y, this.z + this.height),
+        new Phaser.Point3(this.x + this.widthX, this.y + this.widthY, this.z),
+        new Phaser.Point3(this.x + this.widthX, this.y + this.widthY, this.z + this.height)
+    ];
 };
 
 Phaser.Cube.prototype.constructor = Phaser.Cube;
@@ -99,16 +113,16 @@ Phaser.Cube.prototype = {
         return Phaser.Cube.intersects(this, b);
     },
     getCorners: function () {
-        return [
-            new Phaser.Point3(this.x, this.y, this.z),
-            new Phaser.Point3(this.x, this.y, this.z + this.height),
-            new Phaser.Point3(this.x, this.y + this.widthY, this.z),
-            new Phaser.Point3(this.x, this.y + this.widthY, this.z + this.height),
-            new Phaser.Point3(this.x + this.widthX, this.y, this.z),
-            new Phaser.Point3(this.x + this.widthX, this.y, this.z + this.height),
-            new Phaser.Point3(this.x + this.widthX, this.y + this.widthY, this.z),
-            new Phaser.Point3(this.x + this.widthX, this.y + this.widthY, this.z + this.height)
-        ];
+        this._corners[0].setTo(this.x, this.y, this.z);
+        this._corners[1].setTo(this.x, this.y, this.z + this.height);
+        this._corners[2].setTo(this.x, this.y + this.widthY, this.z);
+        this._corners[3].setTo(this.x, this.y + this.widthY, this.z + this.height);
+        this._corners[4].setTo(this.x + this.widthX, this.y, this.z);
+        this._corners[5].setTo(this.x + this.widthX, this.y, this.z + this.height);
+        this._corners[6].setTo(this.x + this.widthX, this.y + this.widthY, this.z);
+        this._corners[7].setTo(this.x + this.widthX, this.y + this.widthY, this.z + this.height);
+
+        return this._corners;
     }
 };
 

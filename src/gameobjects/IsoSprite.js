@@ -141,7 +141,7 @@ Phaser.IsoSprite.prototype._toIso = function () {
     }
 };
 
-Object.defineProperty(Phaser.IsoSprite.prototype, "ix", {
+Object.defineProperty(Phaser.IsoSprite.prototype, "isoX", {
     get: function () {
         return this._isoPosition.x;
     },
@@ -150,7 +150,7 @@ Object.defineProperty(Phaser.IsoSprite.prototype, "ix", {
     }
 });
 
-Object.defineProperty(Phaser.IsoSprite.prototype, "iy", {
+Object.defineProperty(Phaser.IsoSprite.prototype, "isoY", {
     get: function () {
         return this._isoPosition.y;
     },
@@ -159,7 +159,7 @@ Object.defineProperty(Phaser.IsoSprite.prototype, "iy", {
     }
 });
 
-Object.defineProperty(Phaser.IsoSprite.prototype, "iz", {
+Object.defineProperty(Phaser.IsoSprite.prototype, "isoZ", {
     get: function () {
         return this._isoPosition.z;
     },
@@ -168,8 +168,14 @@ Object.defineProperty(Phaser.IsoSprite.prototype, "iz", {
     }
 });
 
+Object.defineProperty(Phaser.IsoSprite.prototype, "isoPosition", {
+    get: function () {
+        return this._isoPosition;
+    }
+});
+
 Object.defineProperty(Phaser.IsoSprite.prototype, "depth", {
     get: function () {
-        return (this._isoPosition.x + this._isoPosition.y) + this._isoPosition.z;
+        return (this._isoPosition.x + this._isoPosition.y) + (this._isoPosition.z);
     }
 });

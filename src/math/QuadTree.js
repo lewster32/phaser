@@ -144,7 +144,6 @@ Phaser.QuadTree.prototype = {
     * @param {Phaser.Group} group - The Group to add to the quadtree.
     */
     populate: function (group) {
-
         group.forEach(this.populateHandler, this, true);
 
     },
@@ -153,10 +152,9 @@ Phaser.QuadTree.prototype = {
     * Handler for the populate method.
     *
     * @method Phaser.QuadTree#populateHandler
-    * @param {Phaser.Sprite|object} sprite - The Sprite to check.
+    * @param {Phaser.Sprite|Phaser.IsoSprite|object} sprite - The Sprite to check.
     */
     populateHandler: function (sprite) {
-
         if (sprite.body && sprite.exists)
         {
             this.insert(sprite.body);
@@ -285,7 +283,7 @@ Phaser.QuadTree.prototype = {
     * Return all objects that could collide with the given Sprite or Rectangle.
     *
     * @method Phaser.QuadTree#retrieve
-    * @param {Phaser.Sprite|Phaser.Rectangle} source - The source object to check the QuadTree against. Either a Sprite or Rectangle.
+    * @param {Phaser.Sprite|Phaser.IsoSprite|Phaser.Rectangle} source - The source object to check the QuadTree against. Either a Sprite or Rectangle.
     * @return {array} - Array with all detected objects.
     */
     retrieve: function (source) {

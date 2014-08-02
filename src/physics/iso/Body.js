@@ -45,7 +45,7 @@ Phaser.Physics.IsoArcade.Body = function (sprite) {
     * @property {Phaser.Point3} position - The position of the physics body.
     * @readonly
     */
-    this.position = new Phaser.Point3(sprite.ix, sprite.iy, sprite.iz);
+    this.position = new Phaser.Point3(sprite.isoX, sprite.isoY, sprite.isoZ);
 
     /**
     * @property {Phaser.Point} prev - The previous position of the physics body.
@@ -121,7 +121,7 @@ Phaser.Physics.IsoArcade.Body = function (sprite) {
     /**
     * @property {Phaser.Point3} center - The center coordinate of the physics body.
     */
-    this.center = new Phaser.Point3(sprite.ix + this.halfWidthX, sprite.iy + this.halfWidthY, sprite.iz + this.halfHeight);
+    this.center = new Phaser.Point3(sprite.isoX + this.halfWidthX, sprite.isoY + this.halfWidthY, sprite.isoZ + this.halfHeight);
 
     /**
     * @property {Phaser.Point3} velocity - The velocity in pixels per second sq. of the Body.
@@ -356,6 +356,20 @@ Phaser.Physics.IsoArcade.Body = function (sprite) {
     */
     this._dz = 0;
 
+    /**
+     * @property {Point3[]} _corners - The 8 corners of the bounding cube.
+     * @private
+     */
+    this._corners = [new Phaser.Point3(this.x, this.y, this.z),
+        new Phaser.Point3(this.x, this.y, this.z + this.height),
+        new Phaser.Point3(this.x, this.y + this.widthY, this.z),
+        new Phaser.Point3(this.x, this.y + this.widthY, this.z + this.height),
+        new Phaser.Point3(this.x + this.widthX, this.y, this.z),
+        new Phaser.Point3(this.x + this.widthX, this.y, this.z + this.height),
+        new Phaser.Point3(this.x + this.widthX, this.y + this.widthY, this.z),
+        new Phaser.Point3(this.x + this.widthX, this.y + this.widthY, this.z + this.height)
+    ];
+
 };
 
 Phaser.Physics.IsoArcade.Body.prototype = {
@@ -429,9 +443,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
 
         this.updateBounds();
 
-        this.position.x = (this.sprite.ix - (0.5 * this.widthX)) + this.offset.x;
-        this.position.y = (this.sprite.iy - (0.5 * this.widthY)) + this.offset.y;
-        this.position.z = (this.sprite.iz - (0.5 * this.height)) + this.offset.z;
+        this.position.x = (this.sprite.isoX - (0.5 * this.widthX)) + this.offset.x;
+        this.position.y = (this.sprite.isoY - (0.5 * this.widthY)) + this.offset.y;
+        this.position.z = (this.sprite.isoZ - (0.5 * this.height)) + this.offset.z;
 
         this.rotation = this.sprite.angle;
 
@@ -545,9 +559,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
                 }
             }
 
-            this.sprite.ix += this._dx;
-            this.sprite.iy += this._dy;
-            this.sprite.iz += this._dz;
+            this.sprite.isoX += this._dx;
+            this.sprite.isoY += this._dy;
+            this.sprite.isoZ += this._dz;
         }
 
         this.center.setTo(this.position.x + this.halfWidthX, this.position.y + this.halfWidthY, this.position.z + this.halfHeight);
@@ -796,16 +810,17 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {[Phaser.Point3]} An array of Phaser.Point3 values specifying each corner co-ordinate.
     */
     getCorners: function () {
-        return [
-            new Phaser.Point3(this.x, this.y, this.z),
-            new Phaser.Point3(this.x, this.y, this.z + this.height),
-            new Phaser.Point3(this.x, this.y + this.widthY, this.z),
-            new Phaser.Point3(this.x, this.y + this.widthY, this.z + this.height),
-            new Phaser.Point3(this.x + this.widthX, this.y, this.z),
-            new Phaser.Point3(this.x + this.widthX, this.y, this.z + this.height),
-            new Phaser.Point3(this.x + this.widthX, this.y + this.widthY, this.z),
-            new Phaser.Point3(this.x + this.widthX, this.y + this.widthY, this.z + this.height)
-        ];
+
+        this._corners[0].setTo(this.x, this.y, this.z);
+        this._corners[1].setTo(this.x, this.y, this.z + this.height);
+        this._corners[2].setTo(this.x, this.y + this.widthY, this.z);
+        this._corners[3].setTo(this.x, this.y + this.widthY, this.z + this.height);
+        this._corners[4].setTo(this.x + this.widthX, this.y, this.z);
+        this._corners[5].setTo(this.x + this.widthX, this.y, this.z + this.height);
+        this._corners[6].setTo(this.x + this.widthX, this.y + this.widthY, this.z);
+        this._corners[7].setTo(this.x + this.widthX, this.y + this.widthY, this.z + this.height);
+
+        return this._corners;
     }
 };
 
@@ -836,6 +851,19 @@ Object.defineProperty(Phaser.Physics.IsoArcade.Body.prototype, "frontX", {
 });
 
 /**
+* @name Phaser.Physics.IsoArcade.Body#right
+* @property {number} right - The front X value of this Body (same as Body.x + Body.widthX) - alias used for QuadTree
+* @readonly
+*/
+Object.defineProperty(Phaser.Physics.IsoArcade.Body.prototype, "right", {
+
+    get: function () {
+        return this.position.x + this.widthX;
+    }
+
+});
+
+/**
 * @name Phaser.Physics.IsoArcade.Body#frontY
 * @property {number} right - The front Y value of this Body (same as Body.y + Body.widthY)
 * @readonly
@@ -847,6 +875,20 @@ Object.defineProperty(Phaser.Physics.IsoArcade.Body.prototype, "frontY", {
     }
 
 });
+
+/**
+* @name Phaser.Physics.IsoArcade.Body#bottom
+* @property {number} right - The front Y value of this Body (same as Body.y + Body.widthY) - alias used for QuadTree
+* @readonly
+*/
+Object.defineProperty(Phaser.Physics.IsoArcade.Body.prototype, "bottom", {
+
+    get: function () {
+        return this.position.y + this.widthY;
+    }
+
+});
+
 
 /**
 * @name Phaser.Physics.IsoArcade.Body#x

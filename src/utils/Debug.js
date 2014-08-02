@@ -672,7 +672,7 @@ Phaser.Utils.Debug.prototype = {
 
             for (var i = 0; i < quadtree.objects.length; i++)
             {
-                this.context.strokeRect(quadtree.objects[i].x, quadtree.objects[i].y, quadtree.objects[i].width, quadtree.objects[i].height);
+                this.context.strokeRect(quadtree.objects[i].x, quadtree.objects[i].y, quadtree.objects[i].widthX || quadtree.objects[i].width, quadtree.objects[i].widthY || quadtree.objects[i].height);
             }
         }
         else
@@ -703,14 +703,45 @@ Phaser.Utils.Debug.prototype = {
         var bounds = octree.bounds;
 
         if (octree.nodes.length === 0) {
-            this.context.strokeStyle = color;
-            this.context.strokeRect(bounds.x, bounds.y, bounds.widthX, bounds.widthY);
-            this.text('size: ' + octree.objects.length, bounds.x + 4, bounds.y + 16, 'rgb(0,200,0)', '12px Courier');
 
-            this.context.strokeStyle = 'rgb(0,255,0)';
+            this.context.strokeStyle = color;
+
+            var cube = new Phaser.Cube(bounds.x, bounds.y, bounds.z, bounds.widthX, bounds.widthY, bounds.height);
+            var corners = cube.getCorners();
+
+            points = corners.slice(0, corners.length);
+            points = points.map(function (p) {
+                var newPos = this.game.iso.project(p);
+                newPos.x;
+                newPos.y;
+                return newPos;
+            });
+
+            this.context.moveTo(points[0].x, points[0].y);
+            this.context.beginPath();
+            this.context.strokeStyle = color;
+
+            this.context.lineTo(points[1].x, points[1].y);
+            this.context.lineTo(points[3].x, points[3].y);
+            this.context.lineTo(points[2].x, points[2].y);
+            this.context.lineTo(points[6].x, points[6].y);
+            this.context.lineTo(points[4].x, points[4].y);
+            this.context.lineTo(points[5].x, points[5].y);
+            this.context.lineTo(points[1].x, points[1].y);
+            this.context.lineTo(points[0].x, points[0].y);
+            this.context.lineTo(points[4].x, points[4].y);
+            this.context.moveTo(points[0].x, points[0].y);
+            this.context.lineTo(points[2].x, points[2].y);
+            this.context.moveTo(points[3].x, points[3].y);
+            this.context.lineTo(points[7].x, points[7].y);
+            this.context.lineTo(points[6].x, points[6].y);
+            this.context.moveTo(points[7].x, points[7].y);
+            this.context.lineTo(points[5].x, points[5].y);
+            this.context.stroke();
+            this.context.closePath();
 
             for (var i = 0; i < octree.objects.length; i++) {
-                this.context.strokeRect(octree.objects[i].x, octree.objects[i].y, octree.objects[i].widthX, octree.objects[i].widthY);
+                this.body(octree.objects[i].sprite, 'rgb(0,255,0)', false);
             }
         }
         else {
