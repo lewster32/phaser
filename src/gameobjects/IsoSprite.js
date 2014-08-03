@@ -72,7 +72,7 @@ Phaser.IsoSprite.prototype._project = function () {
     if (this._isoPositionChanged) {
         this.game.iso.project(this._isoPosition, this.position);
 
-        if (this.snap) {
+        if (this.snap > 0) {
             this.position.x = Phaser.Math.snapTo(this.position.x, this.snap);
             this.position.y = Phaser.Math.snapTo(this.position.y, this.snap);
         }
@@ -152,7 +152,7 @@ Object.defineProperty(Phaser.IsoSprite.prototype, "isoPosition", {
 Object.defineProperty(Phaser.IsoSprite.prototype, "depth", {
     get: function () {
         if (this._depthChanged === true) {
-            this._depth = (this._isoPosition.x + this._isoPosition.y) + (this._isoPosition.z + (this.height * this.anchor.y));
+            this._depth = (this._isoPosition.x + this._isoPosition.y) + (this._isoPosition.z * 0.95);
             this._depthChanged = false;
         }
         return this._depth;

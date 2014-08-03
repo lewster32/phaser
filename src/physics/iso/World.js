@@ -391,17 +391,6 @@ Phaser.Physics.IsoArcade.prototype = {
 
         this.collideHandler(object1, object2, collideCallback, processCallback, callbackContext, false);
 
-        /*
-        if (Array.isArray(object2)) {
-            for (var i = 0, len = object2.length; i < len; i++) {
-                this.collideHandler(object1, object2[i], collideCallback, processCallback, callbackContext, false);
-            }
-        }
-        else {
-            this.collideHandler(object1, object2, collideCallback, processCallback, callbackContext, false);
-        }
-        */
-
         return (this._total > 0);
 
     },
@@ -421,7 +410,7 @@ Phaser.Physics.IsoArcade.prototype = {
     collideHandler: function (object1, object2, collideCallback, processCallback, callbackContext, overlapOnly) {
 
         //  Only collide valid objects
-        if (typeof object2 === 'undefined' && (object1.type === Phaser.GROUP)) {
+        if (!object2 && (object1.type === Phaser.GROUP || Array.isArray(object1))) {
             this.collideGroupVsSelf(object1, collideCallback, processCallback, callbackContext, overlapOnly);
             return;
         }
