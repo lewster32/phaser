@@ -1,8 +1,8 @@
 /**
- * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2014 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
- */
+* @author       Lewis Lane <lew@rotaes.org>
+* @copyright    2014 Rotates.org
+* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+*/
 
 /**
 * Javascript QuadTree
@@ -10,7 +10,7 @@
 * @author Timo Hausmann
 *
 * @version 1.0, July 27th 2014
-* @author Lewis Lane adapted from code by Richard Davey
+* @author Richard Davey
 * The original code was a conversion of the Java code posted to GameDevTuts. However I've tweaked
 * it massively to add node indexing, removed lots of temp. var creation and significantly
 * increased performance as a result.
@@ -212,7 +212,7 @@ Phaser.Octree.prototype = {
         var index;
 
         //  if we have subnodes ...
-        if (this.nodes[0] != null)
+        if (this.nodes[0] !== null)
         {
             index = this.getIndex(body);
 
@@ -228,7 +228,7 @@ Phaser.Octree.prototype = {
         if (this.objects.length > this.maxObjects && this.level < this.maxLevels)
         {
             //  Split if we don't already have subnodes
-            if (this.nodes[0] == null)
+            if (this.nodes[0] === null)
             {
                 this.split();
             }
@@ -323,11 +323,13 @@ Phaser.Octree.prototype = {
     */
     retrieve: function (source) {
 
+        var returnObjects, index;
+
         if (source instanceof Phaser.Cube)
         {
-            var returnObjects = this.objects;
+            returnObjects = this.objects;
 
-            var index = this.getIndex(source);
+            index = this.getIndex(source);
         }
         else
         {
@@ -336,9 +338,9 @@ Phaser.Octree.prototype = {
                 return this._empty;
             }
 
-            var returnObjects = this.objects;
+            returnObjects = this.objects;
 
-            var index = this.getIndex(source.body);
+            index = this.getIndex(source.body);
         }
 
         if (this.nodes[0])

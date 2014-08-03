@@ -443,9 +443,10 @@ Phaser.Physics.IsoArcade.Body.prototype = {
 
         this.updateBounds();
 
-        this.position.x = (this.sprite.isoX - (0.5 * this.widthX)) + this.offset.x;
-        this.position.y = (this.sprite.isoY - (0.5 * this.widthY)) + this.offset.y;
-        this.position.z = (this.sprite.isoZ - (0.5 * this.height)) + this.offset.z;
+        //  Working out how to incorporate anchors into this was... fun.
+        this.position.x = this.sprite.isoX + ((this.widthX * -this.sprite.anchor.x) + this.widthX * 0.5) + this.offset.x;
+        this.position.y = this.sprite.isoY + ((this.widthY * this.sprite.anchor.x) - this.widthY * 0.5) + this.offset.y;
+        this.position.z = this.sprite.isoZ - ((this.height * -this.sprite.anchor.y * 2) + this.height) + this.offset.z;
 
         this.rotation = this.sprite.angle;
 
@@ -670,8 +671,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @method Phaser.Physics.IsoArcade.Body#reset
     * @param {number} x - The new x position of the Body.
     * @param {number} y - The new y position of the Body.
+    * @param {number} z - The new z position of the Body.
     */
-    reset: function (x, y) {
+    reset: function (x, y, z) {
 
         this.velocity.set(0);
         this.acceleration.set(0);
@@ -679,9 +681,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
         this.angularVelocity = 0;
         this.angularAcceleration = 0;
 
-        this.position.x = (x - (0.5 * this.widthX)) + this.offset.x;
-        this.position.y = (y - (0.5 * this.widthY)) + this.offset.y;
-        this.position.z = (z - (0.5 * this.height)) + this.offset.z;
+        this.position.x = x + ((this.widthX * -this.sprite.anchor.x) + this.widthX * 0.5) + this.offset.x;
+        this.position.y = y + ((this.widthY * this.sprite.anchor.x) - this.widthY * 0.5) + this.offset.y;
+        this.position.z = z - ((this.height * -this.sprite.anchor.y * 2) + this.height) + this.offset.z;
 
         this.prev.x = this.position.x;
         this.prev.y = this.position.y;
@@ -703,13 +705,12 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @method Phaser.Physics.IsoArcade.Body#hitTest
     * @param {number} x - The world x coordinate to test.
     * @param {number} y - The world y coordinate to test.
+    * @param {number} z - The world z coordinate to test.
     * @return {boolean} True if the given coordinates are inside this Body, otherwise false.
     */
-    hitTest: function (x, y) {
+    hitTest: function (x, y, z) {
 
-        //  ***** TODO PROPERLY *****
-
-        return Phaser.Rectangle.contains(this, x, y);
+        return Phaser.Cube.contains(this, x, y, z);
 
     },
 
@@ -720,7 +721,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {boolean} True if in contact with either the world bounds.
     */
     onFloor: function () {
+
         return this.blocked.down;
+
     },
 
     /**
@@ -730,7 +733,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {boolean} True if in contact with world bounds.
     */
     onWall: function () {
+
         return (this.blocked.frontX || this.blocked.frontY || this.blocked.backX || this.blocked.backY);
+
     },
 
     /**
@@ -740,7 +745,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {number} The absolute delta value.
     */
     deltaAbsX: function () {
+
         return (this.deltaX() > 0 ? this.deltaX() : -this.deltaX());
+
     },
 
     /**
@@ -750,7 +757,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {number} The absolute delta value.
     */
     deltaAbsY: function () {
+
         return (this.deltaY() > 0 ? this.deltaY() : -this.deltaY());
+
     },
 
     /**
@@ -760,7 +769,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {number} The absolute delta value.
     */
     deltaAbsZ: function () {
+
         return (this.deltaZ() > 0 ? this.deltaZ() : -this.deltaZ());
+
     },
 
     /**
@@ -770,7 +781,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {number} The delta value. Positive if the motion was to the right, negative if to the left.
     */
     deltaX: function () {
+
         return this.position.x - this.prev.x;
+
     },
 
     /**
@@ -780,7 +793,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {number} The delta value. Positive if the motion was downwards, negative if upwards.
     */
     deltaY: function () {
+
         return this.position.y - this.prev.y;
+
     },
 
     /**
@@ -790,7 +805,9 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {number} The delta value. Positive if the motion was downwards, negative if upwards.
     */
     deltaZ: function () {
+
         return this.position.z - this.prev.z;
+
     },
 
     /**
@@ -800,11 +817,13 @@ Phaser.Physics.IsoArcade.Body.prototype = {
     * @return {number} The delta value. Positive if the motion was clockwise, negative if anti-clockwise.
     */
     deltaR: function () {
+
         return this.rotation - this.preRotation;
+
     },
 
     /**
-    * Returns the 8 corners that make up the cube.
+    * Returns the 8 corners that make up the body's bounding cube.
     *
     * @method Phaser.Physics.IsoArcade.Body#getCorners
     * @return {[Phaser.Point3]} An array of Phaser.Point3 values specifying each corner co-ordinate.
@@ -821,6 +840,7 @@ Phaser.Physics.IsoArcade.Body.prototype = {
         this._corners[7].setTo(this.x + this.widthX, this.y + this.widthY, this.z + this.height);
 
         return this._corners;
+
     }
 };
 
@@ -944,7 +964,7 @@ Object.defineProperty(Phaser.Physics.IsoArcade.Body.prototype, "z", {
 });
 
 /**
-* Render Sprite Body.
+* Render IsoSprite Body.
 *
 * @method Phaser.Physics.IsoArcade.Body#render
 * @param {object} context - The context to render to.
@@ -960,8 +980,8 @@ Phaser.Physics.IsoArcade.Body.render = function (context, body, color, filled) {
 
     var points = [], corners = body.getCorners();
 
-    var posX = body.sprite.parent.x - body.game.camera.x;
-    var posY = body.sprite.parent.y - body.game.camera.y;
+    var posX = -body.sprite.game.camera.x;
+    var posY = -body.sprite.game.camera.y;
 
     if (filled) {
         points = [corners[1], corners[3], corners[2], corners[6], corners[4], corners[5], corners[1]];
@@ -1017,7 +1037,7 @@ Phaser.Physics.IsoArcade.Body.render = function (context, body, color, filled) {
 };
 
 /**
-* Render Sprite Body Physics Data as text.
+* Render IsoSprite Body Physics Data as text.
 *
 * @method Phaser.Physics.IsoArcade.Body#renderBodyInfo
 * @param {Phaser.Physics.IsoArcade.Body} body - The Body to render the info of.
@@ -1030,7 +1050,7 @@ Phaser.Physics.IsoArcade.Body.renderBodyInfo = function (debug, body) {
     debug.line('x: ' + body.x.toFixed(2), 'y: ' + body.y.toFixed(2), 'z: ' + body.z.toFixed(2), 'widthX: ' + body.widthX, 'widthY: ' + body.widthY, 'height: ' + body.height);
     debug.line('velocity x: ' + body.velocity.x.toFixed(2), 'y: ' + body.velocity.y.toFixed(2), 'z: ' + body.velocity.z.toFixed(2), 'deltaX: ' + body._dx.toFixed(2), 'deltaY: ' + body._dy.toFixed(2), 'deltaZ: ' + body._dz.toFixed(2));
     debug.line('acceleration x: ' + body.acceleration.x.toFixed(2), 'y: ' + body.acceleration.y.toFixed(2), 'z: ' + body.acceleration.z.toFixed(2), 'speed: ' + body.speed.toFixed(2), 'angle: ' + body.angle.toFixed(2));
-    debug.line('gravity x: ' + body.gravity.x, 'y: ' + body.gravity.y, 'z: ' + body.gravity.z)
+    debug.line('gravity x: ' + body.gravity.x, 'y: ' + body.gravity.y, 'z: ' + body.gravity.z);
     debug.line('bounce x: ' + body.bounce.x.toFixed(2), 'y: ' + body.bounce.y.toFixed(2), 'z: ' + body.bounce.z.toFixed(2));
     debug.line('touching: ', 'frontX: ' + (body.touching.frontX ? 1 : 0) + ' frontY: ' + (body.touching.frontY ? 1 : 0)  + ' backX: ' + (body.touching.backX ? 1 : 0)  + ' backY: ' + (body.touching.backY ? 1 : 0)  + ' up: ' + (body.touching.up ? 1 : 0)  + ' down: ' + (body.touching.down ? 1 : 0) );
     debug.line('blocked: ', 'frontX: ' + (body.blocked.frontX ? 1 : 0) + ' frontY: ' + (body.blocked.frontY ? 1 : 0) + ' backX: ' + (body.blocked.backX ? 1 : 0) + ' backY: ' + (body.blocked.backY ? 1 : 0) + ' up: ' + (body.blocked.up ? 1 : 0) + ' down: ' + (body.blocked.down ? 1 : 0));

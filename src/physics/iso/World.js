@@ -27,7 +27,7 @@ Phaser.Physics.IsoArcade = function (game) {
     /**
     * @property {Phaser.Cube} bounds - The bounds inside of which the physics world exists. Defaults to match the world bounds relatively closely given the isometric projection.
     */
-    this.bounds = new Phaser.Cube(game.world.width * -0.25, game.world.width * -0.25, 0, game.world.width * 0.25, game.world.width * 0.25, game.world.height * 0.25);
+    this.bounds = new Phaser.Cube(0, 0, 0, game.world.width * 0.5, game.world.width * 0.5, game.world.height * 0.25);
 
     /**
     * Set the checkCollision properties to control for which bounds collision is processed.
@@ -187,7 +187,7 @@ Phaser.Physics.IsoArcade.prototype = {
     */
     setBoundsToWorld: function () {
 
-        this.bounds.setTo(game.world.width * -0.5, game.world.width * -0.25, 0, game.world.width * 0.44, game.world.width * 0.44, game.world.height * 0.5);
+        this.bounds.setTo(0, 0, 0, this.game.world.width * 0.5, this.game.world.width * 0.5, this.game.world.height * 0.5);
 
     },
 
@@ -288,13 +288,13 @@ Phaser.Physics.IsoArcade.prototype = {
 
         max = max || 10000;
 
-        if (axis == 1 && body.allowGravity) {
+        if (axis === 1 && body.allowGravity) {
             velocity += (this.gravity.x + body.gravity.x) * this.game.time.physicsElapsed;
         }
-        else if (axis == 2 && body.allowGravity) {
+        else if (axis === 2 && body.allowGravity) {
             velocity += (this.gravity.y + body.gravity.y) * this.game.time.physicsElapsed;
         }
-        else if (axis == 3 && body.allowGravity) {
+        else if (axis === 3 && body.allowGravity) {
             velocity += (this.gravity.z + body.gravity.z) * this.game.time.physicsElapsed;
         }
 
@@ -428,20 +428,20 @@ Phaser.Physics.IsoArcade.prototype = {
 
         if (object1 && object2 && (object1.exists || object1.length) && (object2.exists || object2.length)) {
             //  ISOSPRITES
-            if (object1.type == Phaser.ISOSPRITE) {
-                if (object2.type == Phaser.ISOSPRITE) {
+            if (object1.type === Phaser.ISOSPRITE) {
+                if (object2.type === Phaser.ISOSPRITE) {
                     this.collideSpriteVsSprite(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
                 }
-                else if (object2.type == Phaser.GROUP || Array.isArray(object2)) {
+                else if (object2.type === Phaser.GROUP || Array.isArray(object2)) {
                     this.collideSpriteVsGroup(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
                 }
             }
             //  GROUPS
-            else if (object1.type == Phaser.GROUP || Array.isArray(object1)) {
-                if (object2.type == Phaser.ISOSPRITE) {
+            else if (object1.type === Phaser.GROUP || Array.isArray(object1)) {
+                if (object2.type === Phaser.ISOSPRITE) {
                     this.collideSpriteVsGroup(object2, object1, collideCallback, processCallback, callbackContext, overlapOnly);
                 }
-                else if (object2.type == Phaser.GROUP || Array.isArray(object2)) {
+                else if (object2.type === Phaser.GROUP || Array.isArray(object2)) {
                     this.collideGroupVsGroup(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
                 }
             }

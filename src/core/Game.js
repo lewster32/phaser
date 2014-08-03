@@ -513,7 +513,7 @@ Phaser.Game.prototype = {
             r = 'WebGL';
             c++;
         }
-        else if (this.renderType == Phaser.HEADLESS)
+        else if (this.renderType === Phaser.HEADLESS)
         {
             r = 'Headless';
         }
@@ -681,7 +681,7 @@ Phaser.Game.prototype = {
             }
         }
 
-        if (this.renderType != Phaser.HEADLESS)
+        if (this.renderType !== Phaser.HEADLESS)
         {
             this.state.preRender();
             this.renderer.render(this.stage);

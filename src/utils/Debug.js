@@ -304,7 +304,7 @@ Phaser.Utils.Debug.prototype = {
     */
     pointer: function (pointer, hideIfUp, downColor, upColor, color) {
 
-        if (pointer == null)
+        if (pointer === null)
         {
             return;
         }
@@ -660,7 +660,7 @@ Phaser.Utils.Debug.prototype = {
 
         this.start();
 
-        var bounds = quadtree.bounds;
+        var bounds = quadtree.bounds, i;
 
         if (quadtree.nodes.length === 0)
         {
@@ -670,14 +670,14 @@ Phaser.Utils.Debug.prototype = {
 
             this.context.strokeStyle = 'rgb(0,255,0)';
 
-            for (var i = 0; i < quadtree.objects.length; i++)
+            for (i = 0; i < quadtree.objects.length; i++)
             {
                 this.context.strokeRect(quadtree.objects[i].x, quadtree.objects[i].y, quadtree.objects[i].widthX || quadtree.objects[i].width, quadtree.objects[i].widthY || quadtree.objects[i].height);
             }
         }
         else
         {
-            for (var i = 0; i < quadtree.nodes.length; i++)
+            for (i = 0; i < quadtree.nodes.length; i++)
             {
                 this.quadTree(quadtree.nodes[i]);
             }
@@ -700,7 +700,7 @@ Phaser.Utils.Debug.prototype = {
 
         this.start();
 
-        var bounds = octree.bounds;
+        var bounds = octree.bounds, i, points;
 
         if (octree.nodes.length === 0) {
 
@@ -740,12 +740,12 @@ Phaser.Utils.Debug.prototype = {
             this.context.stroke();
             this.context.closePath();
 
-            for (var i = 0; i < octree.objects.length; i++) {
+            for (i = 0; i < octree.objects.length; i++) {
                 this.body(octree.objects[i].sprite, 'rgb(0,255,0)', false);
             }
         }
         else {
-            for (var i = 0; i < octree.nodes.length; i++) {
+            for (i = 0; i < octree.nodes.length; i++) {
                 this.octree(octree.nodes[i]);
             }
         }

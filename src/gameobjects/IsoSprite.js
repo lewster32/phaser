@@ -8,174 +8,153 @@ Phaser.IsoSprite = function (game, x, y, z, key, frame, parent) {
 
     Phaser.Sprite.call(this, game, x, y, key, frame, parent);
 
-    this._isoPosition = new Phaser.Point3(x, y, z);
-
-    this._toIso();
-
+    /**
+    * @property {number} type - The const type of this object.
+    * @readonly
+    */
     this.type = Phaser.ISOSPRITE;
 
-    this.snap = 0.3;
-};
+    /**
+    * @property {Phaser.Point3} _isoPosition - Internal 3D position.
+    * @private
+    */
+    this._isoPosition = new Phaser.Point3(x, y, z);
 
-Phaser.IsoSprite.projectionRatio = 0.5;
+    /**
+    * @property {number} snap - Snap this IsoSprite's position to this value; handy for keeping pixel art snapped to whole pixels.
+    * @default
+    */
+    this.snap = 0;
+
+    /**
+    * @property {number} _depth - Internal cached depth value.
+    * @readonly
+    */
+    this._depth = 0;
+
+    /**
+    * @property {boolean} _depthChanged - Internal invalidation control for depth management.
+    * @readonly
+    */
+    this._depthChanged = true;
+
+    /**
+    * @property {boolean} _isoPositionChanged - Internal invalidation control for positioning.
+    * @readonly
+    */
+    this._isoPositionChanged = true;
+
+    this._project();
+};
 
 Phaser.IsoSprite.prototype = Object.create(Phaser.Sprite.prototype);
 Phaser.IsoSprite.prototype.constructor = Phaser.IsoSprite;
 
-Phaser.IsoSprite.prototype.preUpdate = function () {
-
-    if (this._cache[4] === 1 && this.exists) {
-        this.world.setTo(this.parent.position.x + this.position.x, this.parent.position.y + this.position.y);
-        this.worldTransform.tx = this.world.x;
-        this.worldTransform.ty = this.world.y;
-        this._cache[0] = this.world.x;
-        this._cache[1] = this.world.y;
-        this._cache[2] = this.rotation;
-
-        if (this.body) {
-            this.body.preUpdate();
-        }
-
-        this._cache[4] = 0;
-
-        return false;
-    }
-
-    this._cache[0] = this.world.x;
-    this._cache[1] = this.world.y;
-    this._cache[2] = this.rotation;
-
-    if (!this.exists || !this.parent.exists) {
-        //  Reset the renderOrderID
-        this._cache[3] = -1;
-        return false;
-    }
-
-    if (this.lifespan > 0) {
-        this.lifespan -= this.game.time.elapsed;
-
-        if (this.lifespan <= 0) {
-            this.kill();
-            return false;
-        }
-    }
-
-    //  Cache the bounds if we need it
-    if (this.autoCull || this.checkWorldBounds) {
-        this._bounds.copyFrom(this.getBounds());
-    }
-
-    if (this.autoCull) {
-        //  Won't get rendered but will still get its transform updated
-        this.renderable = this.game.world.camera.screenView.intersects(this._bounds);
-    }
-
-    if (this.checkWorldBounds) {
-        //  The Sprite is already out of the world bounds, so let's check to see if it has come back again
-        if (this._cache[5] === 1 && this.game.world.bounds.intersects(this._bounds)) {
-            this._cache[5] = 0;
-            this.events.onEnterBounds.dispatch(this);
-        }
-        else if (this._cache[5] === 0 && !this.game.world.bounds.intersects(this._bounds)) {
-            //  The Sprite WAS in the screen, but has now left.
-            this._cache[5] = 1;
-            this.events.onOutOfBounds.dispatch(this);
-
-            if (this.outOfBoundsKill) {
-                this.kill();
-                return false;
-            }
-        }
-    }
-
-    this.world.setTo(this.game.camera.x + this.worldTransform.tx, this.game.camera.y + this.worldTransform.ty);
-
-    if (this.visible) {
-        this._cache[3] = this.game.stage.currentRenderOrderID++;
-    }
-
-    this.animations.update();
-
-    if (this.body) {
-        this.body.preUpdate();
-    }
-
-    //  Update any Children
-    for (var i = 0, len = this.children.length; i < len; i++) {
-        this.children[i].preUpdate();
-    }
-
-    return true;
-
-};
-
+/**
+* Internal function called by the World postUpdate cycle.
+*
+* @method Phaser.IsoSprite#postUpdate
+* @memberof Phaser.IsoSprite
+*/
 Phaser.IsoSprite.prototype.postUpdate = function () {
-    if (this.key instanceof Phaser.BitmapData) {
-        this.key.render();
-    }
+    Phaser.Sprite.prototype.postUpdate.apply(this);
 
-    if (this.exists && this.body) {
-        this.body.postUpdate();
-    }
-
-    //  Fixed to Camera?
-    if (this._cache[7] === 1) {
-        this.position.x = (this.game.camera.view.x + this.cameraOffset.x) / this.game.camera.scale.x;
-        this.position.y = (this.game.camera.view.y + this.cameraOffset.y) / this.game.camera.scale.y;
-    }
-
-    //  Update any Children
-    for (var i = 0, len = this.children.length; i < len; i++) {
-        this.children[i].postUpdate();
-    }
-
-    this._toIso();
+    this._project();
 };
 
-Phaser.IsoSprite.prototype._toIso = function () {
-    this.game.iso.project(this._isoPosition, this.position);
+/**
+* Internal function that performs the axonometric projection from 3D to 2D space.
+* @method Phaser.IsoSprite#_project
+* @memberof Phaser.IsoSprite
+* @private
+*/
+Phaser.IsoSprite.prototype._project = function () {
+    if (this._isoPositionChanged) {
+        this.game.iso.project(this._isoPosition, this.position);
 
-    if (this.snap) {
-        this.position.x = Phaser.Math.snapTo(this.position.x, this.snap);
-        this.position.y = Phaser.Math.snapTo(this.position.y, this.snap);
+        if (this.snap) {
+            this.position.x = Phaser.Math.snapTo(this.position.x, this.snap);
+            this.position.y = Phaser.Math.snapTo(this.position.y, this.snap);
+        }
+
+        this._isoPositionChanged = false;
     }
 };
 
+/**
+* The axonometric position of the IsoSprite on the x axis. Increasing the x coordinate will move the object down and to the right on the screen.
+*
+* @name Phaser.Sprite#isoX
+* @property {number} isoX - The axonometric position of the IsoSprite on the x axis.
+*/
 Object.defineProperty(Phaser.IsoSprite.prototype, "isoX", {
     get: function () {
         return this._isoPosition.x;
     },
     set: function (value) {
         this._isoPosition.x = value;
+        this._depthChanged = this._isoPositionChanged = true;
     }
 });
 
+/**
+* The axonometric position of the IsoSprite on the y axis. Increasing the y coordinate will move the object down and to the left on the screen.
+*
+* @name Phaser.Sprite#isoY
+* @property {number} isoY - The axonometric position of the IsoSprite on the y axis.
+*/
 Object.defineProperty(Phaser.IsoSprite.prototype, "isoY", {
     get: function () {
         return this._isoPosition.y;
     },
     set: function (value) {
         this._isoPosition.y = value;
+        this._depthChanged = this._isoPositionChanged = true;
     }
 });
 
+/**
+* The axonometric position of the IsoSprite on the z axis. Increasing the z coordinate will move the object directly upwards on the screen.
+*
+* @name Phaser.Sprite#isoZ
+* @property {number} isoZ - The axonometric position of the IsoSprite on the z axis.
+*/
 Object.defineProperty(Phaser.IsoSprite.prototype, "isoZ", {
     get: function () {
         return this._isoPosition.z;
     },
     set: function (value) {
         this._isoPosition.z = value;
+        this._depthChanged = this._isoPositionChanged = true;
     }
 });
 
+/**
+* A Point3 object representing the axonometric position of the IsoSprite.
+*
+* @name Phaser.Sprite#isoPosition
+* @property {Point3} isoPosition - The axonometric position of the IsoSprite on the z axis.
+* @readonly
+*/
 Object.defineProperty(Phaser.IsoSprite.prototype, "isoPosition", {
     get: function () {
         return this._isoPosition;
     }
 });
 
+/**
+* The non-unit distance of the IsoSprite from the 'front' of the scene. Used to correctly depth sort a group of IsoSprites.
+*
+* @name Phaser.Sprite#depth
+* @property {number} depth - A calculated value used for depth sorting.
+* @readonly
+*/
 Object.defineProperty(Phaser.IsoSprite.prototype, "depth", {
     get: function () {
-        return (this._isoPosition.x + this._isoPosition.y) + (this._isoPosition.z);
+        if (this._depthChanged === true) {
+            this._depth = (this._isoPosition.x + this._isoPosition.y) + (this._isoPosition.z + (this.height * this.anchor.y));
+            this._depthChanged = false;
+        }
+        return this._depth;
     }
 });

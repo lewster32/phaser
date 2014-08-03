@@ -195,7 +195,7 @@ Phaser.QuadTree.prototype = {
         var index;
 
         //  if we have subnodes ...
-        if (this.nodes[0] != null)
+        if (this.nodes[0] !== null)
         {
             index = this.getIndex(body);
 
@@ -211,7 +211,7 @@ Phaser.QuadTree.prototype = {
         if (this.objects.length > this.maxObjects && this.level < this.maxLevels)
         {
             //  Split if we don't already have subnodes
-            if (this.nodes[0] == null)
+            if (this.nodes[0] === null)
             {
                 this.split();
             }
@@ -288,11 +288,13 @@ Phaser.QuadTree.prototype = {
     */
     retrieve: function (source) {
 
+        var returnObjects, index;
+
         if (source instanceof Phaser.Rectangle)
         {
-            var returnObjects = this.objects;
+            returnObjects = this.objects;
 
-            var index = this.getIndex(source);
+            index = this.getIndex(source);
         }
         else
         {
@@ -301,9 +303,9 @@ Phaser.QuadTree.prototype = {
                 return this._empty;
             }
 
-            var returnObjects = this.objects;
+            returnObjects = this.objects;
 
-            var index = this.getIndex(source.body);
+            index = this.getIndex(source.body);
         }
 
         if (this.nodes[0])
