@@ -316,9 +316,14 @@ Phaser.Physics.IsoArcade.Body = function (sprite) {
     this.blocked = { up: false, down: false, frontX: false, frontY: false, backX: false, backY: false };
 
     /**
-    * @property {number} phaser - Is this Body in a preUpdate (1) or postUpdate (2) state?
+    * @property {number} phase - Is this Body in a preUpdate (1) or postUpdate (2) state?
     */
     this.phase = 0;
+
+    /**
+    * @property {boolean} skipTree - If true and you collide this IsoSprite against a Group, it will disable the collision check from using a QuadTree/Octree.
+    */
+    this.skipTree = false;
 
     /**
     * @property {boolean} _reset - Internal cache var.

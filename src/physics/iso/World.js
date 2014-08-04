@@ -57,9 +57,14 @@ Phaser.Physics.IsoArcade = function (game) {
     this.forceXY = false;
 
     /**
-    * @property {boolean} forceQuadTree - If true, the collision/overlap routines will use a QuadTree, which will ignore the z position of objects when determining potential collisions. This will be faster if you don't do a lot of stuff on the z-axis.
+    * @property {boolean} skipTree - If true an Octree/QuadTree will never be used for any collision. Handy for tightly packed games. See also Body.skipTree.
     */
-    this.forceQuadTree = false;
+    this.skipTree = false;
+
+    /**
+    * @property {boolean} useQuadTree - If true, the collision/overlap routines will use a QuadTree, which will ignore the z position of objects when determining potential collisions. This will be faster if you don't do a lot of stuff on the z-axis.
+    */
+    this.useQuadTree = false;
 
     /**
     * @property {Phaser.QuadTree} quadTree - The world QuadTree.
@@ -483,42 +488,57 @@ Phaser.Physics.IsoArcade.prototype = {
     */
     collideSpriteVsGroup: function (sprite, group, collideCallback, processCallback, callbackContext, overlapOnly) {
 
-        if (group.length === 0 || !sprite.body) {
+        if (group.length === 0 || !sprite.body)
+        {
             return;
         }
 
-        if (this.forceQuadTree) {
-            //  What is the sprite colliding with in the quadTree?
-            this.quadTree.clear();
-
-            this.quadTree.reset(this.bounds.x, this.bounds.y, this.bounds.widthX, this.bounds.widthY, this.maxObjects, this.maxLevels);
-
-            this.quadTree.populate(group);
-
-            this._potentials = this.quadTree.retrieve(sprite);
-        }
-        else {
-            //  What is the sprite colliding with in the octree?
-            this.octree.clear();
-
-            this.octree.reset(this.bounds.x, this.bounds.y, this.bounds.z, this.bounds.widthX, this.bounds.widthY, this.bounds.height, this.maxObjects, this.maxLevels);
-
-            this.octree.populate(group);
-
-            this._potentials = this.octree.retrieve(sprite);
-        }
-
-        for (var i = 0, len = this._potentials.length; i < len; i++) {
-            //  We have our potential suspects, are they in this group?
-            if (this.separate(sprite.body, this._potentials[i], processCallback, callbackContext, overlapOnly)) {
-                if (collideCallback) {
-                    collideCallback.call(callbackContext, sprite, this._potentials[i].sprite);
+        if (sprite.body.skipTree || this.skipTree) {
+            for (var i = 0, len = group.children.length; i < len; i++)
+            {
+                if (group.children[i] && group.children[i].exists)
+                {
+                    this.collideSpriteVsSprite(sprite, group.children[i], collideCallback, processCallback, callbackContext, overlapOnly);
                 }
-
-                this._total++;
             }
         }
+        else
+        {
+            if (this.useQuadTree) {
+                //  What is the sprite colliding with in the quadTree?
+                this.quadTree.clear();
+            
+                this.quadTree.reset(this.bounds.x, this.bounds.y, this.bounds.widthX, this.bounds.widthY, this.maxObjects, this.maxLevels);
 
+                this.quadTree.populate(group);
+
+                this._potentials = this.quadTree.retrieve(sprite);
+            }
+            else {
+                //  What is the sprite colliding with in the octree?
+                this.octree.clear();
+
+                this.octree.reset(this.bounds.x, this.bounds.y, this.bounds.z, this.bounds.widthX, this.bounds.widthY, this.bounds.height, this.maxObjects, this.maxLevels);
+
+                this.octree.populate(group);
+
+                this._potentials = this.octree.retrieve(sprite);
+            }
+
+            for (var i = 0, len = this._potentials.length; i < len; i++)
+            {
+                //  We have our potential suspects, are they in this group?
+                if (this.separate(sprite.body, this._potentials[i], processCallback, callbackContext, overlapOnly))
+                {
+                    if (collideCallback)
+                    {
+                        collideCallback.call(callbackContext, sprite, this._potentials[i].sprite);
+                    }
+
+                    this._total++;
+                }
+            }
+        }
     },
 
     /**
