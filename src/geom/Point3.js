@@ -1,8 +1,26 @@
 /**
- * Phaser Point3 constructor
- * @class Phaser.Point3
- * @constructor
- */
+* @author       Lewis Lane (lew@rotates.org) adapted from code by Richard Davey <rich@photonstorm.com>
+* @copyright    2014 Rotates.org
+* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+*/
+
+/**
+* @class Phaser.Point3
+* @classdesc
+* The Point3 object represents a location in a three-dimensional coordinate system, 
+* where x and y represent the horizontal axes and z represents the vertical axis.
+* The following code creates a point at (0,0,0):
+* `var myPoint = new Phaser.Point3();`
+*/
+
+/**
+* Creates a new Point3 object. If you pass no parameters a Point3 is created set to (0, 0, 0).
+*
+* @constructor
+* @param {number} [x=0] - The horizontal X position of this Point.
+* @param {number} [y=0] - The horizontal Y position of this Point.
+* @param {number} [z=0] - The vertical position of this Point.
+*/
 Phaser.Point3 = function (x, y, z) {
     x = x || 0;
     y = y || 0;
@@ -35,6 +53,36 @@ Phaser.Point3.prototype = {
     copyFrom: function (source) {
 
         return this.setTo(source.x, source.y, source.z);
+
+    },
+
+    /**
+    * Copies the x, y and z properties from this Point3 to any given object.
+    *
+    * @method Phaser.Point3#copyTo
+    * @param {any} dest - The object to copy to.
+    * @return {Object} The dest object.
+    */
+    copyTo: function (source) {
+
+        dest.x = this.x;
+        dest.y = this.y;
+        dest.z = this.z;
+
+        return dest;
+
+    },
+
+    /**
+    * Determines whether the given object's x/y/z values are equal to this Point3 object.
+    *
+    * @method Phaser.Point3#equals
+    * @param {Phaser.Point3|any} a - The object to compare with this Point3.
+    * @return {boolean} A value of true if the x and y points are equal, otherwise false.
+    */
+    equals: function (a) {
+
+        return (a.x === this.x && a.y === this.y && a.z === this.z);
 
     },
 
@@ -117,7 +165,7 @@ Phaser.Point3.prototype = {
     * @param {number} x - The value to multiply Point3.x by.
     * @param {number} y - The value to multiply Point3.y by.
     * @param {number} z - The value to multiply Point3.z by.
-    * @return {Phaser.Point3} This Point object. Useful for chaining method calls.
+    * @return {Phaser.Point3} This Point3 object. Useful for chaining method calls.
     */
     multiply: function (x, y, z) {
 
@@ -147,4 +195,104 @@ Phaser.Point3.prototype = {
         return this;
 
     },
+};
+
+Phaser.Point3.prototype.constructor = Phaser.Point3;
+
+/**
+* Adds the coordinates of two points together to create a new point.
+*
+* @method Phaser.Point3.add
+* @param {Phaser.Point3} a - The first Point3 object.
+* @param {Phaser.Point3} b - The second Point3 object.
+* @param {Phaser.Point3} [out] - Optional Point3 to store the value in, if not supplied a new Point3 object will be created.
+* @return {Phaser.Point3} The new Point3 object.
+*/
+Phaser.Point3.add = function (a, b, out) {
+
+    if (typeof out === "undefined") { out = new Phaser.Point3(); }
+
+    out.x = a.x + b.x;
+    out.y = a.y + b.y;
+    out.z = a.z + b.z;
+
+    return out;
+
+};
+
+/**
+* Subtracts the coordinates of two points to create a new point.
+*
+* @method Phaser.Point3.subtract
+* @param {Phaser.Point3} a - The first Point3 object.
+* @param {Phaser.Point3} b - The second Point3 object.
+* @param {Phaser.Point3} [out] - Optional Point3 to store the value in, if not supplied a new Point3 object will be created.
+* @return {Phaser.Point3} The new Point3 object.
+*/
+Phaser.Point3.subtract = function (a, b, out) {
+
+    if (typeof out === "undefined") { out = new Phaser.Point3(); }
+
+    out.x = a.x - b.x;
+    out.y = a.y - b.y;
+    out.z = a.z - b.z;
+
+    return out;
+
+};
+
+/**
+* Multiplies the coordinates of two points to create a new point.
+*
+* @method Phaser.Point3.multiply
+* @param {Phaser.Point3} a - The first Point3 object.
+* @param {Phaser.Point3} b - The second Point3 object.
+* @param {Phaser.Point3} [out] - Optional Point3 to store the value in, if not supplied a new Point3 object will be created.
+* @return {Phaser.Point3} The new Point3 object.
+*/
+Phaser.Point3.multiply = function (a, b, out) {
+
+    if (typeof out === "undefined") { out = new Phaser.Point3(); }
+
+    out.x = a.x * b.x;
+    out.y = a.y * b.y;
+    out.z = a.z * b.z;
+
+    return out;
+
+};
+
+/**
+* Divides the coordinates of two points to create a new point.
+*
+* @method Phaser.Point3.divide
+* @param {Phaser.Point3} a - The first Point3 object.
+* @param {Phaser.Point3} b - The second Point3 object.
+* @param {Phaser.Point3} [out] - Optional Point3 to store the value in, if not supplied a new Point3 object3 will be created.
+* @return {Phaser.Point3} The new Point3 object.
+*/
+Phaser.Point3.divide = function (a, b, out) {
+
+    if (typeof out === "undefined") { out = new Phaser.Point3(); }
+
+    out.x = a.x / b.x;
+    out.y = a.y / b.y;
+    out.z = a.z / b.z;
+
+    return out;
+
+};
+
+/**
+* Determines whether the two given Point3 objects are equal. They are considered equal if they have the same x, y and z values.
+*
+* @method Phaser.Point3.equals
+* @param {Phaser.Point3} a - The first Point3 object.
+* @param {Phaser.Point3} b - The second Point3 object.
+* @return {boolean} A value of true if the Points3 are equal, otherwise false.
+*/
+Phaser.Point3.equals = function (a, b) {
+
+    return (a.x === b.x && a.y === b.y && a.z === b.z);
+
 };
